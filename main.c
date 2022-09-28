@@ -1,4 +1,5 @@
 #include "headers.h"
+#define STRSIZE 20
 
 int main(int argc, char** argv) {
     char* X = argv[1];
@@ -7,7 +8,7 @@ int main(int argc, char** argv) {
     pid_t pid;
     int status;
     int port[2];
-    char str [20];
+    char str [STRSIZE];
 
     if (pipe(port) < 0) {
         perror("Pipe error\n");
@@ -23,8 +24,7 @@ int main(int argc, char** argv) {
 
     if (pid > 0) { //Parent process
         printf("parent (PID %d): created child (PID %d)\n", getpid(), pid);
-        read(port[0], &str, strlen(str)); //Reading X from the pipe, will wait until there is something to read
-        printf("%s\n", str);
+        read(port[0], &str, strlen(str)); //Reading X from the pipe, will wait until there is something to read FIXME get entire string to get read
         printf("parent (PID %d): read from pipe %s\n", getpid(), str);
         printf("parent (PID %d): received Y = \"%s\"\n", getpid(), Y);
         strcat(str, Y); //Concatenating read string and Y
@@ -39,6 +39,7 @@ int main(int argc, char** argv) {
         printf("child (PID %d): received X = \"%s\"\n", getpid(), X);
         printf("child (PID %d): writing \"%s\" into pipe\n", getpid(), X);
         write(port[1], X, strlen(X)); //Writing X to the pipe
+        //FIXME Make child wait for parent to read
         read(port[0], &str, strlen(str)); //Will wait until there is something to read
         printf("child (PID %d): read from pipe \"%s\"\n", getpid(), str);
         printf("child (PID %d): received Z = \"%s\"\n", getpid(), Z);
